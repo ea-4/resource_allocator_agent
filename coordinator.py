@@ -10,7 +10,7 @@ class CoordinatorAgent(Agent):
         async def run(self):
             print("Coordinator: Sending CFP...")
 
-            msg = Message(to="worker@localhost")  # Worker JID
+            msg = Message(to="worker1@space")  # Worker JID
             msg.set_metadata("performative", "cfp")
             msg.body = "task_1"
 

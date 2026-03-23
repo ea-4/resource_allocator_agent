@@ -1,3 +1,6 @@
+from spade.agent import Agent
+from spade.behaviour import CyclicBehaviour
+
 class WorkerAgent(Agent):
 
     def __init__(self, jid, password, capacity, speed):

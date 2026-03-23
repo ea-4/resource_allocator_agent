@@ -1,9 +1,20 @@
-async def main():
-    coordinator = CoordinatorAgent("coordinator@localhost", "password")
-    worker = WorkerAgent("worker@localhost", "password", capacity=10, speed=2)
+from coordinator import CoordinatorAgent 
+from worker import WorkerAgent
+import os 
+import asyncio
 
-    await coordinator.start()
-    await worker.start()
+async def main():
+
+    
+    jid = os.getenv("AGENT_JID")
+    jpsw = os.getenv("AGENT_PSW")
+    coordinator = CoordinatorAgent("coordinator@space", "coordinatorpswd")
+    worker = WorkerAgent("worker1@space", "workerpswd", capacity=10, speed=2)
+
+
+    await coordinator.start(auto_register=True)
+    await worker.start(auto_register=True)
+
 
     await asyncio.sleep(20)
 
