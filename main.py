@@ -8,12 +8,12 @@ async def main():
     
     jid = os.getenv("AGENT_JID")
     jpsw = os.getenv("AGENT_PSW")
-    coordinator = CoordinatorAgent("coordinator@space", "coordinatorpswd")
-    worker = WorkerAgent("worker1@space", "workerpswd", capacity=10, speed=2)
+    coordinator = CoordinatorAgent("co.a@xmpp.jp", "coordinatorpswd")
+    worker = WorkerAgent("w.1@xmpp.jp", "workerpswd", capacity=10, speed=2)
 
 
-    await coordinator.start(auto_register=True)
-    await worker.start(auto_register=True)
+    await coordinator.start()
+    await worker.start()
 
 
     await asyncio.sleep(20)

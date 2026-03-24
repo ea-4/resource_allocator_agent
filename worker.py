@@ -1,5 +1,7 @@
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
+from spade.template import Template
+
 
 class WorkerAgent(Agent):
 
@@ -31,4 +33,8 @@ class WorkerAgent(Agent):
 
     async def setup(self):
         print("Worker started")
-        self.add_behaviour(self.ReceiveCFPBehaviour())
+        template = Template()
+        template.set_metadata("performative", "cfp")
+
+        self.add_behaviour(self.ReceiveCFPBehaviour(), template)
+
