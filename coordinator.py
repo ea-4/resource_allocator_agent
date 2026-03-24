@@ -9,9 +9,11 @@ class CoordinatorAgent(Agent):
 
     class SendCFPBehaviour(OneShotBehaviour):
         async def run(self):
+
+
             print("Coordinator: Sending CFP...")
 
-            msg = Message(to="w.1@xmpp.jp")  # Worker JID
+            msg = Message(to="w.1@localhost")  
             msg.set_metadata("performative", "cfp")
             msg.body = "task 1"
 

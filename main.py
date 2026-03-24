@@ -6,15 +6,16 @@ import asyncio
 async def main():
 
     
-    jid = os.getenv("AGENT_JID")
-    jpsw = os.getenv("AGENT_PSW")
-    coordinator = CoordinatorAgent("co.a@xmpp.jp", "coordinatorpswd")
-    worker = WorkerAgent("w.1@xmpp.jp", "workerpswd", capacity=10, speed=2)
+    wpswd = os.getenv("W1_PSWD")
+    jpswd = os.getenv("COOR_PSWD")
+    coordinator = CoordinatorAgent("co.a@localhost", jpswd, use_tls=False, use_ssl=False)
+    worker = WorkerAgent("w.1@localhost", wpswd, capacity=10, speed=2, use_tls=False, use_ssl=False)
 
 
-    await coordinator.start()
-    await worker.start()
+    await coordinator.start(auto_register=True)
+    await worker.start(auto_register=True)
 
+    await asyncio.sleep(5)
 
     await asyncio.sleep(20)
 
