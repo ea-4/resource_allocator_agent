@@ -1,5 +1,7 @@
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
+from spade.template import Template
+
 
 class WorkerAgent(Agent):
 
@@ -13,22 +15,28 @@ class WorkerAgent(Agent):
         async def run(self):
             msg = await self.receive(timeout=10)
             if msg:
-                print(f"Worker: CFP received -> {msg.body}")
+                if msg.get_metadata("performative") == "cfp":
 
-                # Simple evaluation
-                execution_time = 10 / self.agent.speed
-                load_penalty = self.agent.current_load
+                    print(f"Worker: CFP received -> {msg.body}")
 
-                utility = execution_time + load_penalty
+                    # Simple evaluation
+                    execution_time = 10 / self.agent.speed
+                    load_penalty = self.agent.current_load
 
-                reply = msg.make_reply()
-                reply.set_metadata("performative", "propose")
-                reply.body = str(utility)
+                    utility = execution_time + load_penalty
 
-                await self.send(reply)
+                    reply = msg.make_reply()
+                    reply.set_metadata("performative", "propose")
+                    reply.body = str(utility)
+
+                    await self.send(reply)
             else:
                 self.kill()
 
     async def setup(self):
         print("Worker started")
-        self.add_behaviour(self.ReceiveCFPBehaviour())
+        template = Template()
+        template.set_metadata("performative", "cfp")
+
+        self.add_behaviour(self.ReceiveCFPBehaviour(), template)
+
