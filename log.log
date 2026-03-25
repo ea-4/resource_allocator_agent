@@ -1,0 +1,52 @@
+(cenv) PS C:\Users\atwin\Desktop\resource_allocator_agent> & c:/Users/atwin/Desktop/resource_allocator_agent/cenv/Scripts/python.exe c:/Users/atwin/Desktop/resource_allocator_agent/main.py
+
+========== TASK T1 ==========
+
+ CFP: Broadcasting task...
+
+Worker1 -> PROPOSE: 5.0
+Worker2 -> REFUSE (over capacity)
+Worker2 -> NO PROPOSAL
+Worker3 -> REFUSE (over capacity)
+Worker3 -> NO PROPOSAL
+
+ BEST: Worker1 (utility=5.0)
+Worker1 <- ACCEPT_PROPOSAL
+Worker1: Executing task...
+Worker1: New load = 10
+Worker1: Task completed. Load now 0
+Worker2 did not respond      
+Worker3 did not respond      
+
+========== TASK T2 ==========
+
+ CFP: Broadcasting task...   
+
+Worker1 -> PROPOSE: 2.5      
+Worker2 -> PROPOSE: 1.25     
+Worker3 -> PROPOSE: 5.0
+
+ BEST: Worker2 (utility=1.25)
+Worker1 <- REJECT_PROPOSAL
+Worker2 <- ACCEPT_PROPOSAL
+Worker2: Executing task...
+Worker2: New load = 5
+Worker2: Task completed. Load now 0
+Worker3 <- REJECT_PROPOSAL
+
+========== TASK T3 ==========
+
+ CFP: Broadcasting task...
+
+Worker1 -> PROPOSE: 4.0
+Worker2 -> PROPOSE: 2.0
+Worker3 -> REFUSE (over capacity)
+Worker3 -> NO PROPOSAL
+
+ BEST: Worker2 (utility=2.0)
+Worker1 <- REJECT_PROPOSAL
+Worker2 <- ACCEPT_PROPOSAL
+Worker2: Executing task...
+Worker2: New load = 8
+Worker2: Task completed. Load now 0
+Worker3 did not respond

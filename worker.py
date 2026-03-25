@@ -1,42 +1,31 @@
-from spade.agent import Agent
-from spade.behaviour import CyclicBehaviour
-from spade.template import Template
-
-
-class WorkerAgent(Agent):
-
-    def __init__(self, jid, password, capacity, speed):
-        super().__init__(jid, password)
+import time
+class WorkerAgent:
+    def __init__(self, name, capacity, speed):
+        self.name = name
         self.capacity = capacity
         self.speed = speed
         self.current_load = 0
 
-    class ReceiveCFPBehaviour(CyclicBehaviour):
-        async def run(self):
-            msg = await self.receive(timeout=10)
-            if msg:
-                if msg.get_metadata("performative") == "cfp":
+    def evaluate_task(self, task_size):
+        # Check capacity constraint
+        if self.current_load + task_size > self.capacity:
+            print(f"{self.name} -> REFUSE (over capacity)")
+            return None  # No proposal
 
-                    print(f"Worker: CFP received -> {msg.body}")
+        execution_time = task_size / self.speed
+        load_penalty = self.current_load
+        utility = execution_time + load_penalty
 
-                    # Simple evaluation
-                    execution_time = 10 / self.agent.speed
-                    load_penalty = self.agent.current_load
+        return utility
 
-                    utility = execution_time + load_penalty
 
-                    reply = msg.make_reply()
-                    reply.set_metadata("performative", "propose")
-                    reply.body = str(utility)
+    def execute_task(self, task_size):
+        print(f"{self.name}: Executing task...")
+        self.current_load += task_size
+        print(f"{self.name}: New load = {self.current_load}")
 
-                    await self.send(reply)
-            else:
-                self.kill()
+        execution_time = task_size / self.speed
+        time.sleep(execution_time)
 
-    async def setup(self):
-        print("Worker started")
-        template = Template()
-        template.set_metadata("performative", "cfp")
-
-        self.add_behaviour(self.ReceiveCFPBehaviour(), template)
-
+        self.current_load -= task_size
+        print(f"{self.name}: Task completed. Load now {self.current_load}")

@@ -1,25 +1,30 @@
-from coordinator import CoordinatorAgent 
+from coordinator import CoordinatorAgent
 from worker import WorkerAgent
-import os 
-import asyncio
+from task import Task   # optional
 
-async def main():
+def main():
 
-    
-    wpswd = os.getenv("W1_PSWD")
-    jpswd = os.getenv("COOR_PSWD")
-    coordinator = CoordinatorAgent("co.a@localhost", jpswd, use_tls=False, use_ssl=False)
-    worker = WorkerAgent("w.1@localhost", wpswd, capacity=10, speed=2, use_tls=False, use_ssl=False)
+    # Create workers
+    workers = [
+        WorkerAgent("Worker1", capacity=10, speed=2),
+        WorkerAgent("Worker2", capacity=8, speed=4),
+        WorkerAgent("Worker3", capacity=6, speed=1),
+    ]
+
+    coordinator = CoordinatorAgent(workers)
+
+    # Define tasks
+    tasks = [
+        Task("T1", 10),
+        Task("T2", 5),
+        Task("T3", 8)
+    ]
+
+    # Run system
+    for task in tasks:
+        print(f"\n========== TASK {task.task_id} ==========")
+        coordinator.run_auction(task.size)
 
 
-    await coordinator.start(auto_register=True)
-    await worker.start(auto_register=True)
-
-    await asyncio.sleep(5)
-
-    await asyncio.sleep(20)
-
-    await coordinator.stop()
-    await worker.stop()
-
-asyncio.run(main())
+if __name__ == "__main__":
+    main()

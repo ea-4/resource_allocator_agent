@@ -1,41 +1,43 @@
-import asyncio
-from spade.agent import Agent
-from spade.behaviour import OneShotBehaviour, CyclicBehaviour
-from spade.message import Message
-from spade.template import Template
+class CoordinatorAgent:
+    def __init__(self, workers):
+        self.workers = workers
 
+    def run_auction(self, task_size):
+        print("\n CFP: Broadcasting task...\n")
 
-class CoordinatorAgent(Agent):
+        proposals = []
 
-    class SendCFPBehaviour(OneShotBehaviour):
-        async def run(self):
+        # Collect proposals
+        for worker in self.workers:
+            utility = worker.evaluate_task(task_size)
+           
+            if utility is not None:
+                print(f"{worker.name} -> PROPOSE: {utility}")
+                proposals.append((worker, utility))
 
+           
+        if not proposals:
+            print("No available workers for this task")
+            return
 
-            print("Coordinator: Sending CFP...")
+        # Select best worker
+        best_worker, best_utility = min(proposals, key=lambda x: x[1])
 
-            msg = Message(to="w.1@localhost")  
-            msg.set_metadata("performative", "cfp")
-            msg.body = "task 1"
+        print(f"\n BEST: {best_worker.name} (utility={best_utility})")
 
-            await self.send(msg)
-
-    class ReceiveProposalsBehaviour(CyclicBehaviour):
-        async def run(self):
-            msg = await self.receive(timeout=10)
-            if msg:
-                print(f"Coordinator: Received proposal -> {msg.body}")
+        # Send ACCEPT / REJECT
+        for worker, utility in proposals:
+            if worker == best_worker:
+                print(f"{worker.name} <- ACCEPT_PROPOSAL")
+                worker.execute_task(task_size)
             else:
-                print("Coordinator: No proposals received")
-                self.kill()
+                print(f"{worker.name} <- REJECT_PROPOSAL")
 
-    async def setup(self):
-   
-        print("Coordinator started")
 
-        self.add_behaviour(self.SendCFPBehaviour())
+        
+        responded_workers = [w for w, _ in proposals]
 
-        template = Template()
-        template.set_metadata("performative", "propose")
-
-        self.add_behaviour(self.ReceiveProposalsBehaviour(), template)
+        for worker in self.workers:
+            if worker not in responded_workers:
+                print(f"{worker.name} did not respond")
 
