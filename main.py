@@ -1,25 +1,20 @@
-from coordinator import CoordinatorAgent 
-from worker import WorkerAgent
-import os 
 import asyncio
+from coordinator import CoordinatorAgent
+from worker import WorkerAgent
 
 async def main():
-
-    
-    wpswd = os.getenv("W1_PSWD")
-    jpswd = os.getenv("COOR_PSWD")
-    coordinator = CoordinatorAgent("co.a@localhost", jpswd, use_tls=False, use_ssl=False)
-    worker = WorkerAgent("w.1@localhost", wpswd, capacity=10, speed=2, use_tls=False, use_ssl=False)
-
+    coordinator = CoordinatorAgent("coordinator@xmpp.jp", "coordinator_password")
+    worker1 = WorkerAgent("worker1@xmpp.jp", "worker1_password", capacity=10, speed=2)
+    worker2 = WorkerAgent("worker2@xmpp.jp", "worker2_password", capacity=8, speed=3)
 
     await coordinator.start(auto_register=True)
-    await worker.start(auto_register=True)
-
-    await asyncio.sleep(5)
+    await worker1.start(auto_register=True)
+    await worker2.start(auto_register=True)
 
     await asyncio.sleep(20)
 
     await coordinator.stop()
-    await worker.stop()
+    await worker1.stop()
+    await worker2.stop()
 
 asyncio.run(main())

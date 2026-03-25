@@ -1,8 +1,9 @@
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
+from spade.message import Message
 from spade.template import Template
 
-
+# Worker agent evaluates tasks and proposes utility
 class WorkerAgent(Agent):
 
     def __init__(self, jid, password, capacity, speed):
@@ -15,28 +16,21 @@ class WorkerAgent(Agent):
         async def run(self):
             msg = await self.receive(timeout=10)
             if msg:
-                if msg.get_metadata("performative") == "cfp":
-
-                    print(f"Worker: CFP received -> {msg.body}")
-
-                    # Simple evaluation
-                    execution_time = 10 / self.agent.speed
-                    load_penalty = self.agent.current_load
-
-                    utility = execution_time + load_penalty
-
+                task_size = 5
+                if self.agent.current_load + task_size <= self.agent.capacity:
+                    execution_time = task_size / self.agent.speed
+                    utility = execution_time + self.agent.current_load
                     reply = msg.make_reply()
                     reply.set_metadata("performative", "propose")
                     reply.body = str(utility)
-
                     await self.send(reply)
-            else:
-                self.kill()
+                    self.agent.current_load += task_size
+                    await asyncio.sleep(execution_time)
+                    self.agent.current_load -= task_size
+                else:
+                    print(f"{self.agent.name} -> REFUSE (over capacity)")
 
     async def setup(self):
-        print("Worker started")
         template = Template()
         template.set_metadata("performative", "cfp")
-
         self.add_behaviour(self.ReceiveCFPBehaviour(), template)
-

@@ -1,41 +1,36 @@
-import asyncio
 from spade.agent import Agent
-from spade.behaviour import OneShotBehaviour, CyclicBehaviour
+from spade.behaviour import CyclicBehaviour
 from spade.message import Message
 from spade.template import Template
 
+# Worker agent evaluates tasks and proposes utility
+class WorkerAgent(Agent):
 
-class CoordinatorAgent(Agent):
+    def __init__(self, jid, password, capacity, speed):
+        super().__init__(jid, password)
+        self.capacity = capacity
+        self.speed = speed
+        self.current_load = 0
 
-    class SendCFPBehaviour(OneShotBehaviour):
-        async def run(self):
-
-
-            print("Coordinator: Sending CFP...")
-
-            msg = Message(to="w.1@localhost")  
-            msg.set_metadata("performative", "cfp")
-            msg.body = "task 1"
-
-            await self.send(msg)
-
-    class ReceiveProposalsBehaviour(CyclicBehaviour):
+    class ReceiveCFPBehaviour(CyclicBehaviour):
         async def run(self):
             msg = await self.receive(timeout=10)
             if msg:
-                print(f"Coordinator: Received proposal -> {msg.body}")
-            else:
-                print("Coordinator: No proposals received")
-                self.kill()
+                task_size = 5
+                if self.agent.current_load + task_size <= self.agent.capacity:
+                    execution_time = task_size / self.agent.speed
+                    utility = execution_time + self.agent.current_load
+                    reply = msg.make_reply()
+                    reply.set_metadata("performative", "propose")
+                    reply.body = str(utility)
+                    await self.send(reply)
+                    self.agent.current_load += task_size
+                    await asyncio.sleep(execution_time)
+                    self.agent.current_load -= task_size
+                else:
+                    print(f"{self.agent.name} -> REFUSE (over capacity)")
 
     async def setup(self):
-   
-        print("Coordinator started")
-
-        self.add_behaviour(self.SendCFPBehaviour())
-
         template = Template()
-        template.set_metadata("performative", "propose")
-
-        self.add_behaviour(self.ReceiveProposalsBehaviour(), template)
-
+        template.set_metadata("performative", "cfp")
+        self.add_behaviour(self.ReceiveCFPBehaviour(), template)
